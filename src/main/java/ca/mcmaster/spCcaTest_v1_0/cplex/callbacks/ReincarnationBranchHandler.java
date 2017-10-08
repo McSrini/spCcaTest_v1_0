@@ -6,14 +6,14 @@
 package ca.mcmaster.spCcaTest_v1_0.cplex.callbacks;
 
 import ca.mcmaster.spCcaTest_v1_0.utilities.BranchHandlerUtilities; 
-import static ca.mcmaster.spCcaTest_v1_0.Constants.IS_MAXIMIZATION;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.LOG_FILE_EXTENSION;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.LOG_FOLDER;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.MINUS_INFINITY;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.ONE;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.PLUS_INFINITY;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.TWO;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.ZERO;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.IS_MAXIMIZATION;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.LOG_FILE_EXTENSION;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.LOG_FOLDER;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.MINUS_INFINITY;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.ONE;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.PLUS_INFINITY;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.TWO;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.ZERO;
 import ca.mcmaster.spCcaTest_v1_0.cb.ReincarnationMaps;
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.BranchingInstruction;

@@ -5,10 +5,10 @@
  */
 package ca.mcmaster.spCcaTest_v1_0.utilities;
 
-import static ca.mcmaster.spCcaTest_v1_0.Constants.LOG_FILE_EXTENSION;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.LOG_FOLDER;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.ONE;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.ZERO;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.LOG_FILE_EXTENSION;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.LOG_FOLDER;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.ONE;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.ZERO;
 import ca.mcmaster.spCcaTest_v1_0.cplex.ActiveSubtree;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.BranchingInstruction;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.NodeAttachment;

@@ -5,7 +5,7 @@
  */
 package ca.mcmaster.spCcaTest_v1_0;
   
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import ca.mcmaster.spCcaTest_v1_0.cb.*;
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
 import ca.mcmaster.spCcaTest_v1_0.cplex.*;
@@ -67,9 +67,6 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
     //seymour-disj_10 ru=20000, NUM_PARTITIONS =  1000 , sct = 6m, ts=2m, 6m:3m 6m:1m size >=20/10, packfact=12 
      
     
-    public static   String MIP_NAME_UNDER_TEST ="a1c1s1";
-    public static   double MIP_WELLKNOWN_SOLUTION =  11503.444125 ;
-    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 10000;   // or 5000
    
     
     /*
@@ -83,9 +80,7 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
     public static   double MIP_WELLKNOWN_SOLUTION =  764772;
     public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 2000;  */
  
-    private static  int NUM_PARTITIONS =200;
-    private static double EXPECTED_LEAFS_PER_PARTITION = (RAMP_UP_TO_THIS_MANY_LEAFS +DOUBLE_ZERO)/NUM_PARTITIONS;
-    
+   
     //private static final int SOLUTION_CYCLE_Tu           fgggd hjhhIME_MINUTES = THREE;
      
     public static void main(String[] args) throws Exception {
@@ -114,11 +109,7 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
         //first run 4 identical ramp ups
         //MPS_FILE_ON_DISK =  "F:\\temporary files here\\"+MIP_NAME_UNDER_TEST+".mps"; //windows
         MPS_FILE_ON_DISK =   MIP_NAME_UNDER_TEST +".mps";  //linux
-        
-        
-        BackTrack=false;
-        BAD_MIGRATION_CANDIDATES_DURING_TESTING = new ArrayList<String>(); //empty
-        
+      
         logger.debug ("starting ramp up") ;  
         ActiveSubtree activeSubtreeForRampUp = new ActiveSubtree () ;
         activeSubtreeForRampUp.solve( RAMP_UP_TO_THIS_MANY_LEAFS, PLUS_INFINITY, MILLION, true, false); 

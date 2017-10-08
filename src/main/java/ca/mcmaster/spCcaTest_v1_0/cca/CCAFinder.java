@@ -6,7 +6,7 @@
 package ca.mcmaster.spCcaTest_v1_0.cca;
 
 import ca.mcmaster.spCcaTest_v1_0.utilities.CCAUtilities;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import static ca.mcmaster.spCcaTest_v1_0.utilities.CCAUtilities.*;
 import ca.mcmaster.spCcaTest_v1_0.cplex.ActiveSubtree;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.BranchingInstruction;

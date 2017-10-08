@@ -6,7 +6,7 @@
 package ca.mcmaster.spCcaTest_v1_0.cplex.callbacks;
 
 import ca.mcmaster.spCcaTest_v1_0.utilities.BranchHandlerUtilities;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.BranchingInstruction;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.NodeAttachment;
 import ilog.concert.IloException;
@@ -105,10 +105,7 @@ public class BranchHandler extends IloCplex.BranchCallback {
                     thisChild.estimatedLPRelaxationValue = getObjValue();
                     
                     //logger.debug(" Node "+nodeData.nodeID + " created child "+  thisChild.nodeID + " varname " +   vars[childNum][ZERO].getName() + " bound " + bounds[childNum][ZERO] +   (dirs[childNum][ZERO].equals( IloCplex.BranchDirection.Down) ? " U":" L") ) ;
-                    
-                    //for testing purposes, mark some nodes as bad choices for migration
-                    if ( BAD_MIGRATION_CANDIDATES_DURING_TESTING.contains( thisChild.nodeID))       thisChild.isMigrateable= false;
-                         
+                        
                     //for ramp-up testing, temporary measure
                     maxBranchingVars= Math.max(vars[childNum].length ,maxBranchingVars) ; //should always be 1
                     this.nodeCreationInfoList.add( nodeid.toString() +DELIMITER+nodeData.nodeID +DELIMITER+

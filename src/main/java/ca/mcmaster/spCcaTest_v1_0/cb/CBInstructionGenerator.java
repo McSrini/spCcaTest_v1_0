@@ -7,7 +7,7 @@ package ca.mcmaster.spCcaTest_v1_0.cb;
 
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
 import ca.mcmaster.spCcaTest_v1_0.utilities.CCAUtilities;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.NodeAttachment;
 import static java.lang.System.exit;
 import java.util.*;

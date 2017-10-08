@@ -5,7 +5,7 @@
  */
 package ca.mcmaster.spCcaTest_v1_0.cplex.datatypes;
 
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.List;

@@ -5,7 +5,7 @@
  */
 package ca.mcmaster.spCcaTest_v1_0.cb;
 
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode; 
 import java.io.Serializable;
 import static java.lang.System.exit;

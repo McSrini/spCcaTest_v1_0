@@ -6,7 +6,7 @@
 package ca.mcmaster.spCcaTest_v1_0.cplex.datatypes;
 
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*; 
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*; 
 import ilog.concert.IloNumVar;
 import ilog.cplex.IloCplex;
 import java.util.ArrayList;

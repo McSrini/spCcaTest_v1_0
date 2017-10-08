@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author tamvadss
  */
-public class Constants {
+public class ConstantsAndParameters {
         
     public static final String EMPTY_STRING ="";
     public static final String MINUS_ONE_STRING = "-1";
@@ -47,33 +47,27 @@ public class Constants {
      
     public static final boolean IS_MAXIMIZATION = false;
      
-    //CCA represents this many nodes
-    //ignore, unused in experiments
-    public static    int NUM_LEAFS_FOR_MIGRATION_IN_CCA_SUBTREE  =  6;     
-    //remove after testing
-    //List<String> BAD_MIGRATION_CANDIDATES_DURING_TESTING =  Arrays.asList("Node25", "Node23", "Node24","Node13", "Node29", "Node30");     
-    
-    //unused, ignore
-    public static  List<String> BAD_MIGRATION_CANDIDATES_DURING_TESTING = new ArrayList<String>(); // Arrays.asList("Node34",   "Node22", "Node13","Node28", "Node29", "Node30");      
-    
+   
     //used to reject inferior LCA candidates
     public static final double LCA_CANDIDATE_PACKING_FACTOR_LARGEST_ACCEPTABLE=1.20;
     
-    //for testing, grow the tree this big
-    //ignore, not used in experiments
-    public static  final int TOTAL_LEAFS_IN_SOLUTION_TREE_FOR_RAMPUP =  18 ;
     
     //CCA subtree allowed to have slightly less good leafs than asked for in NUM_LEAFS_FOR_MIGRATION_IN_CCA_SUBTREE 
     public static   double CCA_TOLERANCE_FRACTION =  0.00;
     public static  double CCA_PACKING_FACTOR_MAXIMUM_ALLOWED =  0.0;
     
-    //for testing
-    //ignore, not used in experiments
-    public static   boolean BackTrack = true;
+     
     
     public static   int TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 4;    
     public static   double MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 0.5 ;//30 seconds
     public static final int SOLUTION_CYCLE_TIME_MINUTES = 8;
+    
+    public static   String MIP_NAME_UNDER_TEST ="a1c1s1";
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 10000;   // or 5000
+    public static  int NUM_PARTITIONS =200;
+    public static double EXPECTED_LEAFS_PER_PARTITION = (RAMP_UP_TO_THIS_MANY_LEAFS +DOUBLE_ZERO)/NUM_PARTITIONS;
+    
+    
     
     //used to skip CB test
     public static final boolean SKIP_CB_FLAG = true;

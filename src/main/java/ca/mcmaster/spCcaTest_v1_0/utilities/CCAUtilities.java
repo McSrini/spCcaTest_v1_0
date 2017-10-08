@@ -6,7 +6,7 @@
 package ca.mcmaster.spCcaTest_v1_0.utilities;
 
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.NodeAttachment;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import ilog.cplex.IloCplex;
 import java.util.*; 
 

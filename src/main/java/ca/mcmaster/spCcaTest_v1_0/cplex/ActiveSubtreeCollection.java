@@ -5,13 +5,13 @@
  */
 package ca.mcmaster.spCcaTest_v1_0.cplex;
 
-import static ca.mcmaster.spCcaTest_v1_0.Constants.IS_MAXIMIZATION;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.LOG_FILE_EXTENSION;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.LOG_FOLDER;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.MINUS_INFINITY;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.ONE;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.PLUS_INFINITY;
-import static ca.mcmaster.spCcaTest_v1_0.Constants.*;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.IS_MAXIMIZATION;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.LOG_FILE_EXTENSION;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.LOG_FOLDER;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.MINUS_INFINITY;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.ONE;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.PLUS_INFINITY;
+import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
 import static ca.mcmaster.spCcaTest_v1_0.cplex.NodeSelectionStartegyEnum.BEST_ESTIMATE_FIRST;
 import static ca.mcmaster.spCcaTest_v1_0.cplex.NodeSelectionStartegyEnum.STRICT_BEST_FIRST;
