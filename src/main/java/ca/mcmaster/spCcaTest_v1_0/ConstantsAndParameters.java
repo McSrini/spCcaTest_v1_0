@@ -58,13 +58,13 @@ public class ConstantsAndParameters {
     
      
     
-    public static   int TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 4;    
+    public static   int TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 2;    
     public static   double MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 0.5 ;//30 seconds
-    public static final int SOLUTION_CYCLE_TIME_MINUTES = 8;
+    public static final int SOLUTION_CYCLE_TIME_MINUTES = 4;
     
-    public static   String MIP_NAME_UNDER_TEST ="a1c1s1";
-    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 10000;   // or 5000
-    public static  int NUM_PARTITIONS =200;
+    public static   String MIP_NAME_UNDER_TEST ="timtab1";
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 200;   // or 5000
+    public static  int NUM_PARTITIONS =10;
     public static double EXPECTED_LEAFS_PER_PARTITION = (RAMP_UP_TO_THIS_MANY_LEAFS +DOUBLE_ZERO)/NUM_PARTITIONS;
     
     

@@ -82,7 +82,7 @@ public class ActiveSubtree {
 
     
     static {
-        logger.setLevel(Level.OFF);
+        logger.setLevel(Level.WARN);
         PatternLayout layout = new PatternLayout("%5p  %d  %F  %L  %m%n");     
         try {
             logger.addAppender(new  RollingFileAppender(layout,LOG_FOLDER+ActiveSubtree.class.getSimpleName()+ LOG_FILE_EXTENSION));
@@ -215,6 +215,11 @@ public class ActiveSubtree {
     public long getActiveLeafCount() throws IloException {
          
         return allActiveLeafs ==null? ZERO: allActiveLeafs.size();
+    }
+    
+    public double getCurrentCutoff () throws IloException{
+        return  !IS_MAXIMIZATION ?   cplex.getParam(    IloCplex.Param.MIP.Tolerances.UpperCutoff ):
+        cplex.getParam(    IloCplex.Param.MIP.Tolerances.LowerCutoff );             
     }
     
     public void solveWithDynamicSearch(double timeLimitMinutes  ) throws IloException{
@@ -403,9 +408,21 @@ public class ActiveSubtree {
     
       
     public void setCutoffValue(double cutoff) throws IloException {
-        if (!IS_MAXIMIZATION) {
+        boolean conditionMin = !IS_MAXIMIZATION && cutoff <  cplex.getParam(    IloCplex.Param.MIP.Tolerances.UpperCutoff );
+        boolean conditionMax = IS_MAXIMIZATION  && cutoff >  cplex.getParam(    IloCplex.Param.MIP.Tolerances.LowerCutoff );
+        
+        double currentCutoff = cplex.getParam(    IloCplex.Param.MIP.Tolerances.UpperCutoff );
+        if (IS_MAXIMIZATION ) currentCutoff = cplex.getParam(    IloCplex.Param.MIP.Tolerances.LowerCutoff );
+        
+        logger.warn ("currentCutoff " + currentCutoff + " cutoff " + cutoff + " conditionMin "+ conditionMin) ;
+        
+        if (conditionMin || conditionMax ) {
+            logger.warn ( "Setting cuttoff to "+ cutoff + " for tree " + this.guid + " from current cutoff " + currentCutoff);
+        }
+        
+        if (conditionMin) {
             cplex.setParam(    IloCplex.Param.MIP.Tolerances.UpperCutoff, cutoff);
-        }else {
+        }else if (conditionMax){
             cplex.setParam(    IloCplex.Param.MIP.Tolerances.LowerCutoff, cutoff);
         }
     }

@@ -10,6 +10,7 @@ import ca.mcmaster.spCcaTest_v1_0.cb.*;
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
 import ca.mcmaster.spCcaTest_v1_0.cplex.*;
 import ca.mcmaster.spCcaTest_v1_0.cplex.datatypes.*;
+import ilog.concert.IloException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
         logger.debug ("starting ramp up") ;  
         ActiveSubtree activeSubtreeForRampUp = new ActiveSubtree () ;
         activeSubtreeForRampUp.solve( RAMP_UP_TO_THIS_MANY_LEAFS, PLUS_INFINITY, MILLION, true, false); 
-                       
+                              
         //find the best known solution after ramp up
         SolutionVector bestKnownSolutionAfterRampup  = null;
         double incumbentValueAfterRampup = IS_MAXIMIZATION ? MINUS_INFINITY : PLUS_INFINITY;
@@ -131,7 +132,11 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
         //get CCA condidates
         List<CCANode> candidateCCANodes = activeSubtreeForRampUp.getCandidateCCANodesPostRampup(NUM_PARTITIONS);
         
-        if (candidateCCANodes.size() < NUM_PARTITIONS) {
+        //if any leafs are left in the ramped up tree, get them individually as CCA nodes
+        //These CCA nodes are fake CCA nodes, similar to what we do with every individual leaf
+        List<CCANode> leftoverCandidateCCANodes = getadditionalCandidateCCANodes(activeSubtreeForRampUp, candidateCCANodes) ;
+        
+        if (candidateCCANodes.size() + leftoverCandidateCCANodes.size() < NUM_PARTITIONS) {
             logger.error("this splitToCCAPostRampup partitioning cannot be done  , try ramping up to  a larger number of leafs ");
             exit(ZERO);
         }
@@ -146,7 +151,8 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
         // now lets populate the ActiveSubtreeCollections
         //
         long acceptedCandidateWithLowestNumOfLeafs = PLUS_INFINITY;
-        for (int index = ZERO; index < candidateCCANodes.size(); index ++){
+        int index = ZERO;
+        for (; index < candidateCCANodes.size(); index ++){
 
             CCANode ccaNode= candidateCCANodes.get(index);
             
@@ -175,12 +181,27 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
             }               
         }
          
+        //we must append the leftoverCandidateCCANodes
+        for (  CCANode ccaNode :  leftoverCandidateCCANodes){
+            List<CCANode> appendageSBF = new ArrayList<CCANode> ();
+            appendageSBF.add(ccaNode);
+            activeSubtreeCollectionListSBF.add (
+                    new ActiveSubtreeCollection (  appendageSBF, activeSubtreeForRampUp.instructionsFromOriginalMip, 
+                            incumbentValueAfterRampup, bestKnownSolutionAfterRampup!=null, index)
+            );
+            
+            List<CCANode> appendageCCA= new ArrayList<CCANode> ();
+            appendageCCA.add(ccaNode);
+            activeSubtreeCollectionListCCA.add(
+                    new ActiveSubtreeCollection ( appendageCCA , activeSubtreeForRampUp.instructionsFromOriginalMip, 
+                            incumbentValueAfterRampup, bestKnownSolutionAfterRampup!=null, index++)
+            );
+        }
         
         //at this point, we have farmed out CCA nodes, and also
         //have the corresponding subtree collections for comparision [ each subtree collection has all the leafs of the corresponding CCA]                 
-        logger.debug ("number of CCA nodes collected = "+candidateCCANodes.size() + 
-                " . The lowest number of leafs represented by a CCA node is "+ acceptedCandidateWithLowestNumOfLeafs) ;            
-        for ( int index = ZERO; index <  candidateCCANodes.size(); index++){
+        logger.debug ("number of CCA nodes collected = "+candidateCCANodes.size()  ) ;            
+        for (   index = ZERO; index <  candidateCCANodes.size(); index++){
             logger.debug("CCA node is : " + candidateCCANodes.get(index) + 
                     " and its prune list size is " + candidateCCANodes.get(index).pruneList.size()) ;
             logger.debug ("number of leafs in corresponding active subtree collection SBF is = " +     
@@ -191,6 +212,11 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
  
         
         //PREPARATIONS COMPLETE
+        logger.debug ("Ramp up created " +activeSubtreeForRampUp.getActiveLeafCount() +" leafs.") ;
+        logger.debug ("activeSubtreeCollectionListSBF size " + activeSubtreeCollectionListSBF.size()) ;
+        logger.debug ("activeSubtreeCollectionListCCA size " + activeSubtreeCollectionListCCA.size()) ;
+        NUM_PARTITIONS = activeSubtreeCollectionListCCA.size();
+        logger.warn  ("NUM_PARTITIONS is actually " +NUM_PARTITIONS);
         activeSubtreeForRampUp.end();
        
         
@@ -203,7 +229,7 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
         //init the best known solution value and vector which will be updated as the solution progresses
         //Initialize them to values after ramp up
         //SolutionVector  bestKnownSolution = bestKnownSolutionAfterRampup ==null? null : activeSubtreeONE.getSolutionVector();
-        Double  incumbentValue= incumbentValueAfterRampup;
+        Double  incumbentGlobal= incumbentValueAfterRampup;
          
          
         //the first test uses CCA , the second test will use raw leafs
@@ -216,25 +242,27 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
             logger.debug("starting CCA iteration Number "+iterationNumber);
                  
             int numRemainingPartitions = simulateOneMapIteration ( activeSubtreeCollectionListCCA, 
-                                                   NodeSelectionStartegyEnum.STRICT_BEST_FIRST,    incumbentValue);
+                                                   NodeSelectionStartegyEnum.STRICT_BEST_FIRST,    incumbentGlobal);  
                 
             //update driver's copy of incumbent
             for (ActiveSubtreeCollection astc : activeSubtreeCollectionListCCA){
                 if (IS_MAXIMIZATION) {
-                    incumbentValue= Math.max(incumbentValue,  astc.getIncumbentValue());
+                    incumbentGlobal= Math.max(incumbentGlobal,  astc.getLocalIncumbentValue());
                 }else {
-                    incumbentValue= Math.min(incumbentValue,  astc.getIncumbentValue());
+                    incumbentGlobal= Math.min(incumbentGlobal,  astc.getLocalIncumbentValue());
                 }
             }
 
             logger.debug ( "Number of reamining partitions is "+ numRemainingPartitions);                
 
+            logger.debug ( "Global incumbent is "+ incumbentGlobal);        
+            
             //do another iteration involving every partition, unless we are done
             if (ZERO==numRemainingPartitions)  break;
             
         }//for greenFlagForIterations
         
-        logger.debug(" CCA test ended at iteration Number "+iterationNumber + " with incumbent "+incumbentValue);
+        logger.debug(" CCA test ended at iteration Number "+iterationNumber + " with incumbent "+incumbentGlobal);
          
         
          
@@ -256,35 +284,36 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
             logger.info(" \n\n\ntest started for Selection Strategy " + nodeSelectionStrategy  );
             
             //reset incumbent to value after ramp up
-            incumbentValue= incumbentValueAfterRampup;
+            incumbentGlobal= incumbentValueAfterRampup;
             
             //now run the iterations
                  
             for (  iterationNumber=ZERO;   ; iterationNumber++){
    
                 if(isHaltFilePresent())  break;//halt
-                logger.debug("starting test2 iteration Number "+iterationNumber);
+                logger.debug("starting "+nodeSelectionStrategy+" iteration Number "+iterationNumber);
 
                 int numRemainingPartitions = simulateOneMapIteration ( activeSubtreeCollectionList, 
-                                                   nodeSelectionStrategy,    incumbentValue);
+                                                   nodeSelectionStrategy,    incumbentGlobal);
                 
                 //update driver's copy of incumbent
-                for (ActiveSubtreeCollection astc : activeSubtreeCollectionList){
+                for (ActiveSubtreeCollection astc : activeSubtreeCollectionListCCA){
                     if (IS_MAXIMIZATION) {
-                        incumbentValue= Math.max(incumbentValue,  astc.getIncumbentValue());
+                        incumbentGlobal= Math.max(incumbentGlobal,  astc.getLocalIncumbentValue());
                     }else {
-                        incumbentValue= Math.min(incumbentValue,  astc.getIncumbentValue());
+                        incumbentGlobal= Math.min(incumbentGlobal,  astc.getLocalIncumbentValue());
                     }
                 }
                 
-                logger.debug ( "Number of reamining partitions is "+ numRemainingPartitions);                
+                logger.debug ( "Number of reamining partitions is "+ numRemainingPartitions);  
+                logger.debug ( "Global incumbent is "+ incumbentGlobal);        
             
                 //do another iteration involving every partition, unless we are done
                 if (ZERO==numRemainingPartitions)  break;
 
             }//end     of iterations
 
-            logger.debug(" Individual solve test with "+ nodeSelectionStrategy +" ended at iteration Number "+iterationNumber+ " with incumbent "+incumbentValue);
+            logger.debug(" Individual solve test with "+ nodeSelectionStrategy +" ended at iteration Number "+iterationNumber+ " with incumbent "+incumbentGlobal);
             //print status of every partition
             for (int partitionNumber = ZERO;partitionNumber < NUM_PARTITIONS; partitionNumber++ ){
 
@@ -317,9 +346,11 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
     
     //simulate 1 map iteration on the cluster
     //there is one ActiveSubtreeCollection on each partition
-    private static int simulateOneMapIteration (List<ActiveSubtreeCollection> activeSubtreeCollectionList, NodeSelectionStartegyEnum nodeSelectionStrategy, Double  incumbentValue) throws Exception{
+    private static int simulateOneMapIteration (List<ActiveSubtreeCollection> activeSubtreeCollectionList, 
+            NodeSelectionStartegyEnum nodeSelectionStrategy, final Double  incumbentGlobal) throws Exception{
 
         int numRemainingPartitions = activeSubtreeCollectionList.size(); // = NUM_PARTITIONS
+        
          
         //solve every partition for 3 minutes at a time
         for (int partitionNumber = ZERO;partitionNumber < NUM_PARTITIONS; partitionNumber++ ){                     
@@ -332,39 +363,20 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
             logger.debug("Solving partition for "+ SOLUTION_CYCLE_TIME_MINUTES+" minutes " + 
                          " having " +rawnodeCount + " rawnodes and " + treeCount + " trees " + " ... Partition_" + partitionNumber );
 
-            activeSubtreeCollectionList.get(partitionNumber).solve( true, SOLUTION_CYCLE_TIME_MINUTES  ,     
-                        true,    TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE,  nodeSelectionStrategy  );               
+            //inform the partition of the latest global incumbent
+            activeSubtreeCollectionList.get(partitionNumber).setCutoff( incumbentGlobal);
+            activeSubtreeCollectionList.get(partitionNumber).solve(  SOLUTION_CYCLE_TIME_MINUTES  ,     
+                        TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE,  nodeSelectionStrategy  );               
         }
 
-        //if better solution found on any partition, update incumbent, and supply MIP start to every partition
-        int partitionWithIncumbentUpdate = -ONE;
-        for (int partitionNumber = ZERO;partitionNumber < NUM_PARTITIONS; partitionNumber++ )/*]]*/{
-
-            ActiveSubtreeCollection astc = activeSubtreeCollectionList.get(partitionNumber);
-            Double challengerToIncumbent=astc.getIncumbentValue() ;
-
-            if (  (!IS_MAXIMIZATION  && incumbentValue> challengerToIncumbent)  || (IS_MAXIMIZATION && incumbentValue< challengerToIncumbent) ) {     
-                //bestKnownSolution =   solutionVector;
-                incumbentValue =  challengerToIncumbent;
-                partitionWithIncumbentUpdate= partitionNumber;
-            }
-        }
-
-        //update the MIP start if needed
-        if (partitionWithIncumbentUpdate>=ZERO){
-            for (int partitionNumber = ZERO;partitionNumber < NUM_PARTITIONS; partitionNumber++ ){                                      
-                if (partitionNumber==partitionWithIncumbentUpdate) continue;
-                activeSubtreeCollectionList.get(partitionNumber).setCutoff(incumbentValue );//   setMIPStart(bestKnownSolution );                   
-            }
-            logger.debug (" incumbent was updated to " + incumbentValue);
-        }
+       
 
         //if every partition is done, we can stop the iterations
                     
         //check all the  partitions
         for (int partitionNumber = ZERO;partitionNumber < NUM_PARTITIONS; partitionNumber++ ){   
             if (activeSubtreeCollectionList.get(partitionNumber).getPendingRawNodeCount() + activeSubtreeCollectionList.get(partitionNumber).getNumTrees() ==ZERO) {
-                logger.info("This partition is complete: " + partitionNumber);
+                //logger.info("This partition is complete: " + partitionNumber);
                 numRemainingPartitions --;
             }  
         }
@@ -373,6 +385,21 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
 
     }
     
+    
+    private static List<CCANode> getadditionalCandidateCCANodes(ActiveSubtree activeSubtreeForRampUp, List<CCANode> candidateCCANodes) throws IloException {
+        
+        List<NodeAttachment> rampedUpLeafList=        activeSubtreeForRampUp.getActiveLeafList() ;
+        List<String> rampedUpLeafListIDs=       new ArrayList<String>() ;        
+        for (NodeAttachment na : rampedUpLeafList){
+            rampedUpLeafListIDs.add(na.nodeID );
+        }
+        
+        for (CCANode ccaNode: candidateCCANodes) {
+            rampedUpLeafListIDs.removeAll( ccaNode.pruneList );
+        }
+        
+        return activeSubtreeForRampUp.getActiveLeafsAsCCANodes( rampedUpLeafListIDs);     
+    }
 }
 
 

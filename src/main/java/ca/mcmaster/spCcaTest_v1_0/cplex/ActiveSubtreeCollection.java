@@ -35,6 +35,8 @@ import org.apache.log4j.RollingFileAppender;
  * 
  * rd-rplusc-21.mps was solved using round robin in             165395.2753
  * 
+ * This class represents a partition, and the work on it
+ * 
  */
 public class ActiveSubtreeCollection {
     
@@ -47,7 +49,7 @@ public class ActiveSubtreeCollection {
     // the call is activeSubtree.mergeVarBounds(ccaNode,  instructionsFromOriginalMip, true);  
     private  List<BranchingInstruction> instructionsFromOriginalMIP ;
     
-    private double incumbentValue= IS_MAXIMIZATION ? MINUS_INFINITY : PLUS_INFINITY;
+    private double incumbentLocal= IS_MAXIMIZATION ? MINUS_INFINITY : PLUS_INFINITY;
     private SolutionVector incumbentSolution = null;
     
     //astc id
@@ -60,7 +62,9 @@ public class ActiveSubtreeCollection {
         logger.setLevel(Level.DEBUG);
         PatternLayout layout = new PatternLayout("%5p  %d  %F  %L  %m%n");     
         try {
-            logger.addAppender(new  RollingFileAppender(layout,LOG_FOLDER+ActiveSubtreeCollection.class.getSimpleName()+ LOG_FILE_EXTENSION));
+            RollingFileAppender rfa =new  RollingFileAppender(layout,LOG_FOLDER+ActiveSubtreeCollection.class.getSimpleName()+ LOG_FILE_EXTENSION);
+            rfa.setMaxBackupIndex(HUNDRED);
+            logger.addAppender(rfa);
             logger.setAdditivity(false);
         } catch (Exception ex) {
             ///
@@ -73,7 +77,7 @@ public class ActiveSubtreeCollection {
     public ActiveSubtreeCollection (List<CCANode> ccaNodeList, List<BranchingInstruction> instructionsFromOriginalMip, double cutoff, boolean useCutoff, int id) throws Exception {
         rawNodeList=ccaNodeList;
         this.instructionsFromOriginalMIP = instructionsFromOriginalMip;
-        if (useCutoff) this.incumbentValue= cutoff;
+        if (useCutoff) this.incumbentLocal= cutoff;
         //create 1 tree
         //this.promoteCCANodeIntoActiveSubtree( this.getRawNodeWithBestLPRelaxation(), false);
         
@@ -81,7 +85,7 @@ public class ActiveSubtreeCollection {
     }
     
     public void setCutoff (double cutoff) {
-        this.incumbentValue= cutoff;
+        this.incumbentLocal= cutoff;
     }
     
     public void setMIPStart(SolutionVector solutionVector) throws IloException {
@@ -98,7 +102,7 @@ public class ActiveSubtreeCollection {
         double result = -ONE;
         
         try {
-            double bestInteger=this.incumbentValue;
+            double bestInteger=this.incumbentLocal;
             double bestBound = this.getBestReaminingLPRElaxValue() ;
 
             double relativeMIPGap =  bestBound - bestInteger ;        
@@ -127,18 +131,15 @@ public class ActiveSubtreeCollection {
         }
     }
      
-    public void solve (boolean useSimple, double timeLimitMinutes, boolean   useEmptyCallback, double timeSlicePerTreeInMInutes ,  
-            NodeSelectionStartegyEnum nodeSelectionStartegy ) throws Exception {
+    public void solve (  double solutionCycleTimeMinutes,   double timeSlicePerTreeInMInutes ,         NodeSelectionStartegyEnum nodeSelectionStartegy ) throws Exception {
         logger.info(" \n solving ActiveSubtree Collection ... " + PARTITION_ID); 
         Instant startTime = Instant.now();
-        
-        
-        while (activeSubTreeList.size()+ this.rawNodeList.size()>ZERO && Duration.between( startTime, Instant.now()).toMillis()< timeLimitMinutes*SIXTY*THOUSAND){
+                
+        while (activeSubTreeList.size()+ this.rawNodeList.size()>ZERO && Duration.between( startTime, Instant.now()).toMillis()< solutionCycleTimeMinutes*SIXTY*THOUSAND){
             
             double timeUsedUpMInutes = ( DOUBLE_ZERO+ Duration.between( startTime, Instant.now()).toMillis() ) / (SIXTY*THOUSAND) ;
                 
-            logger.info("time in seconds left = "+ (timeLimitMinutes -timeUsedUpMInutes)*SIXTY );
-            
+            logger.info("time in seconds left = "+ (solutionCycleTimeMinutes -timeUsedUpMInutes)*SIXTY );            
                         
             //pick tree with best lp
             ActiveSubtree tree = this.getTreeWithBestRemainingMetric(nodeSelectionStartegy );
@@ -160,47 +161,43 @@ public class ActiveSubtreeCollection {
 
             //keep track of max trees created on this partition during solution
             maxTreesCreatedDuringSolution = Math.max(maxTreesCreatedDuringSolution ,  activeSubTreeList.size());
-            
-            
-            //set best known solution, if any, as MIP start
-            if (incumbentValue != MINUS_INFINITY  && incumbentValue != PLUS_INFINITY){
+                        
+            //set best known LOCAL solution, if any, as MIP start
+            logger.debug (tree.guid +" " + tree.isFeasible() + " Obj val = "+ (tree.isFeasible() ?tree.getObjectiveValue():"NONE")+ "  local incumbent "+ incumbentLocal);
+            if (incumbentLocal != MINUS_INFINITY  && incumbentLocal != PLUS_INFINITY){
                 if (tree.isFeasible()){
-                    if (  (IS_MAXIMIZATION  && incumbentValue> tree.getObjectiveValue())  || (!IS_MAXIMIZATION && incumbentValue< tree.getObjectiveValue()) ) {                
+                    if (  (IS_MAXIMIZATION  && incumbentLocal> tree.getObjectiveValue())  || (!IS_MAXIMIZATION && incumbentLocal< tree.getObjectiveValue()) ) {                
                         //tree.setMIPStart(incumbentSolution);
-                        tree.setCutoffValue( incumbentValue);
+                        logger.debug (tree.guid +" " + tree.isFeasible() + " setting cutoff to "+ incumbentLocal);
+                        tree.setCutoffValue( incumbentLocal);
                     }
                 } else{
                     //tree.setMIPStart(incumbentSolution);
-                    tree.setCutoffValue( incumbentValue);
+                    logger.debug (tree.guid +" " + tree.isFeasible() + " setting cutoff to "+ incumbentLocal);
+                    tree.setCutoffValue( incumbentLocal);
                 }
             }
 
-
-            if (useSimple){
-                
-                double timeSlice = timeSlicePerTreeInMInutes; //default
-                
-                if (  timeLimitMinutes -timeUsedUpMInutes < timeSlicePerTreeInMInutes ) {
-                    timeSlice= timeLimitMinutes -timeUsedUpMInutes;
-                    if (timeSlice < MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE) timeSlice = MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE; //15 second least count
-                }
-                
-                if (timeSlice>ZERO) {
-                    logger.info("Solving tree seeded by cca node "+ tree.seedCCANodeID + " with " + tree.guid  + " for minutes " +  timeSlice);  
-                    tree. solveWithDynamicSearch(timeSlice  );
-                }
-                                
-            } else {
-                //tree.solve( -ONE,  incumbentValue ,  timeSlicePerTree , false, isCollectionFeasibleOrOptimal());
+            //solve the tree for time slice reamining
+            double timeSlice = timeSlicePerTreeInMInutes; //default
+            if (  solutionCycleTimeMinutes -timeUsedUpMInutes < timeSlicePerTreeInMInutes ) {
+                timeSlice= solutionCycleTimeMinutes -timeUsedUpMInutes;
+                if (timeSlice < MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE) timeSlice = MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE; //15 second least count
+            }
+            if (timeSlice>ZERO) {
+                logger.info("Solving tree seeded by cca node "+ tree.seedCCANodeID + " with " + 
+                        tree.guid  + " for minutes " +  timeSlice + " having cutoff " + 
+                        tree.getCurrentCutoff());  
+                tree. solveWithDynamicSearch(timeSlice  );
             }
             
-            //update incumbent if needed            
+            //update LOCAL incumbent if needed            
             if (tree.isFeasible()|| tree.isOptimal()){
                 double objVal =tree.getObjectiveValue();
-                if ((IS_MAXIMIZATION && incumbentValue< objVal)  || (!IS_MAXIMIZATION && incumbentValue> objVal) ){
-                    incumbentValue = objVal;
+                if ((IS_MAXIMIZATION && incumbentLocal< objVal)  || (!IS_MAXIMIZATION && incumbentLocal> objVal) ){
+                    incumbentLocal = objVal;
                     this.incumbentSolution=tree.getSolutionVector();
-                    logger.info("Incumbent updated to  "+ this.incumbentValue + " by tree " + tree.guid + " on this partition " + PARTITION_ID);
+                    logger.info("Local Incumbent updated to  "+ this.incumbentLocal + " by tree " + tree.guid + " on this partition " + PARTITION_ID);
                 }
             }
             
@@ -214,13 +211,13 @@ public class ActiveSubtreeCollection {
             logger.info("Number of trees left is "+ this.activeSubTreeList.size());  
             printStatus();
             
-        }
+        } //while solution cycle not complete
         
-        logger.info(" ActiveSubtree Collection solved to completion "+PARTITION_ID );
+        logger.info(" ActiveSubtree Collection solution cycle complete "+PARTITION_ID );
     }
         
-    public double getIncumbentValue (){
-        return new Double (this.incumbentValue);
+    public double getLocalIncumbentValue (){
+        return new Double (this.incumbentLocal);
     }
     
     
