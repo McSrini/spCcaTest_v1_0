@@ -111,7 +111,8 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
         //MPS_FILE_ON_DISK =  "F:\\temporary files here\\"+MIP_NAME_UNDER_TEST+".mps"; //windows
         MPS_FILE_ON_DISK =   MIP_NAME_UNDER_TEST +".mps";  //linux
       
-        logger.debug ("starting ramp up") ;  
+        logger.debug ("starting ramp up " + MPS_FILE_ON_DISK + " Solution cycle time " + SOLUTION_CYCLE_TIME_MINUTES+
+                      " tree time slice " + TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE + " partitions " + NUM_PARTITIONS) ;  
         ActiveSubtree activeSubtreeForRampUp = new ActiveSubtree () ;
         activeSubtreeForRampUp.solve( RAMP_UP_TO_THIS_MANY_LEAFS, PLUS_INFINITY, MILLION, true, false); 
                               

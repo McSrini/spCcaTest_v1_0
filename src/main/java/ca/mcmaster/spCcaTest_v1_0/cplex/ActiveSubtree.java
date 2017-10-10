@@ -428,9 +428,11 @@ public class ActiveSubtree {
     }
     
     public void setTimeLimitMinutes (double timeLimitMinutes ) throws IloException {
-        //if (inMemory) cplex.setParam(IloCplex.Param.MIP.Strategy.File, ZERO); 
-        if (timeLimitMinutes>ZERO) cplex.setParam(IloCplex.Param.TimeLimit, timeLimitMinutes*SIXTY); 
-        //if (BackTrack) cplex.setParam( IloCplex.Param.MIP.Strategy.Backtrack,  ZERO); 
+        
+        if (timeLimitMinutes>ZERO) {
+            cplex.setParam(IloCplex.Param.TimeLimit, timeLimitMinutes*SIXTY);
+        }                else cplex.setParam(IloCplex.Param.TimeLimit, HUNDRED*SIXTY);
+         
     }
     
     public double getBestRemaining_LPValue() throws IloException{
