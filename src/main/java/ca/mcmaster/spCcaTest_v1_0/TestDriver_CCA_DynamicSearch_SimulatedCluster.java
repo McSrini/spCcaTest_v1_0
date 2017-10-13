@@ -115,6 +115,7 @@ public class TestDriver_CCA_DynamicSearch_SimulatedCluster {
                       " tree time slice " + TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE + " partitions " + NUM_PARTITIONS) ;  
         ActiveSubtree activeSubtreeForRampUp = new ActiveSubtree () ;
         activeSubtreeForRampUp.solve( RAMP_UP_TO_THIS_MANY_LEAFS, PLUS_INFINITY, MILLION, true, false); 
+        logger.debug ("Ramp up created " +activeSubtreeForRampUp.getActiveLeafCount() +" leafs.") ;
                               
         //find the best known solution after ramp up
         SolutionVector bestKnownSolutionAfterRampup  = null;
