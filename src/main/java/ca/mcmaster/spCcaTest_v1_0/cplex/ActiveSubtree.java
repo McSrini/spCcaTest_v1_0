@@ -224,16 +224,39 @@ public class ActiveSubtree {
     
     public void solveWithDynamicSearch(double timeLimitMinutes  ) throws IloException{
         logger.debug("dynamic solve Started at "+LocalDateTime.now()) ;
-        cplex.clearCallbacks();
+        cplex.clearCallbacks(); // no callbacks to clear, actually
          
         setTimeLimitMinutes (  timeLimitMinutes );
-        cplex.setParam(IloCplex.Param.MIP.Strategy.File, TWO);     // low memory !
+        
+        if (SAVE_TO_DISK_FLAG){
+            
+            cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
+            cplex.setParam(IloCplex.Param.MIP.Strategy.File, THREE);     // low memory !
+        }
+        
         cplex.solve();
                     
         logger.debug("dynamic serach solve completed at "+LocalDateTime.now()) ;
     }
     
-     
+    public void solveWithTraditionalSearch(double timeLimitMinutes  ) throws IloException{
+        logger.debug("Traditional solve Started at "+LocalDateTime.now()) ;
+        cplex.clearCallbacks();
+         
+        setTimeLimitMinutes (  timeLimitMinutes );
+        
+        cplex.setParam(IloCplex.Param.MIP.Strategy.Search, ONE);   //traditional
+        
+        if (SAVE_TO_DISK_FLAG){
+            
+            cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
+            cplex.setParam(IloCplex.Param.MIP.Strategy.File, THREE);     // low memory !
+        }
+        
+        cplex.solve();
+                    
+        logger.debug("Traditional serach solve completed at "+LocalDateTime.now()) ;
+    } 
      
     
     //to do : add method to supply MIP starts , and use it while doing round robin and even otherwise
@@ -254,6 +277,7 @@ public class ActiveSubtree {
         if (isRampUp) {
             rampUpNodeHandler.setLeafCountLimit(leafCountLimit);
             this.cplex.use(rampUpNodeHandler) ;
+            cplex.setParam(IloCplex.Param.MIP.Strategy.Backtrack, ZERO);    
         }  
         
         

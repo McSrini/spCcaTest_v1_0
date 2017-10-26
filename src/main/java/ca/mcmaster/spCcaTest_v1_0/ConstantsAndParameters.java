@@ -58,18 +58,52 @@ public class ConstantsAndParameters {
     
      
     
-    public static   int TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 4;    
+    public static   int TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 2;    
     public static   double MINIMUM_TIME_SLICE_IN_MINUTES_PER_ACTIVE_SUBTREE = 0.5 ;//30 seconds
-    public static final int SOLUTION_CYCLE_TIME_MINUTES = 8;
+    public static final int SOLUTION_CYCLE_TIME_MINUTES = 4;
     
+    /*
+    public static   String MIP_NAME_UNDER_TEST ="glass4";
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 200;    
+    public static  int NUM_PARTITIONS =5;
+    */
+    
+    /* 
     public static   String MIP_NAME_UNDER_TEST ="a1c1s1";
-    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 10000;   // or 5000
-    public static  int NUM_PARTITIONS =100;
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 6000;    
+    public static  int NUM_PARTITIONS =75;
+    */
+    
+    /*     
+    public static   String MIP_NAME_UNDER_TEST ="dg012142";
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 6000;    
+    public static  int NUM_PARTITIONS =75;
+    */
+    
+    
+    /* 
+    public static   String MIP_NAME_UNDER_TEST ="lrsa120";
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 9000;    
+    public static  int NUM_PARTITIONS =125;
+    */
+     
+     
+    public static   String MIP_NAME_UNDER_TEST ="b2c1s1";
+    public static  int NUM_PARTITIONS =300;
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = NUM_PARTITIONS*FOUR;    
+    
+    
+        
+    /*
+    public static   String MIP_NAME_UNDER_TEST ="probportfolio";
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 24000;    
+    public static  int NUM_PARTITIONS =150;
+    */
+        
     public static double EXPECTED_LEAFS_PER_PARTITION = (RAMP_UP_TO_THIS_MANY_LEAFS +DOUBLE_ZERO)/NUM_PARTITIONS;
     
+    public static  double WORK_MEM =  1024;
+    public static boolean  SAVE_TO_DISK_FLAG = false;
     
-    
-    //used to skip CB test
-    public static final boolean SKIP_CB_FLAG = true;
     
 }

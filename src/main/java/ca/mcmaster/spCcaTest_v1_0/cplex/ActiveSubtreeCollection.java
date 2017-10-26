@@ -12,6 +12,7 @@ import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.MINUS_INFINITY;
 import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.ONE;
 import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.PLUS_INFINITY;
 import static ca.mcmaster.spCcaTest_v1_0.ConstantsAndParameters.*;
+import ca.mcmaster.spCcaTest_v1_0.cb.CBInstructionTree;
 import ca.mcmaster.spCcaTest_v1_0.cca.CCANode;
 import static ca.mcmaster.spCcaTest_v1_0.cplex.NodeSelectionStartegyEnum.BEST_ESTIMATE_FIRST;
 import static ca.mcmaster.spCcaTest_v1_0.cplex.NodeSelectionStartegyEnum.STRICT_BEST_FIRST;
@@ -130,8 +131,17 @@ public class ActiveSubtreeCollection {
             ast.end();
         }
     }
+    
+    public void solve (  double solutionCycleTimeMinutes,   double timeSlicePerTreeInMInutes ,         
+            NodeSelectionStartegyEnum nodeSelectionStartegy) throws Exception {
      
-    public void solve (  double solutionCycleTimeMinutes,   double timeSlicePerTreeInMInutes ,         NodeSelectionStartegyEnum nodeSelectionStartegy ) throws Exception {
+        solve (    solutionCycleTimeMinutes,     timeSlicePerTreeInMInutes ,         
+              nodeSelectionStartegy,            false, false   , null);
+    }
+     
+    public void solve (  double solutionCycleTimeMinutes,   double timeSlicePerTreeInMInutes ,         
+            NodeSelectionStartegyEnum nodeSelectionStartegy,
+            boolean useTraditionalSearch, boolean reincarnateFlag , CBInstructionTree cbTree) throws Exception {
         logger.info(" \n solving ActiveSubtree Collection ... " + PARTITION_ID); 
         Instant startTime = Instant.now();
                 
@@ -188,7 +198,16 @@ public class ActiveSubtreeCollection {
                 logger.info("Solving tree seeded by cca node "+ tree.seedCCANodeID + " with " + 
                         tree.guid  + " for minutes " +  timeSlice + " having cutoff " + 
                         tree.getCurrentCutoff());  
-                tree. solveWithDynamicSearch(timeSlice  );
+                
+                if (!useTraditionalSearch) {
+                    tree. solveWithDynamicSearch(timeSlice  );
+                } else if (reincarnateFlag){
+                    //reincarnate 
+                    tree.reincarnate( cbTree.asMap() ,   tree.seedCCANodeID ,  PLUS_INFINITY , false  );   
+                } else {
+                    //solve using traditional
+                    tree. solveWithTraditionalSearch(timeSlice  );
+                }
             }
             
             //update LOCAL incumbent if needed            
@@ -210,6 +229,9 @@ public class ActiveSubtreeCollection {
             }           
             logger.info("Number of trees left is "+ this.activeSubTreeList.size());  
             printStatus();
+            
+            //do not continue solution cycle if this cycle is just for reincarnation
+            if (reincarnateFlag) break; 
             
         } //while solution cycle not complete
         
