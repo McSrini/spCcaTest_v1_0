@@ -95,7 +95,10 @@ public class ActiveSubtreeCollection {
         }        
     }
     
-
+    public double getIncumbentValue (){
+        return new Double (this.incumbentLocal);
+    }
+    
 
     //calculate MIP gap using global incumbent, which will be updated as this collection' s incumbent, and the best LP relax value
     //invoke this method only if computation has an incumbent

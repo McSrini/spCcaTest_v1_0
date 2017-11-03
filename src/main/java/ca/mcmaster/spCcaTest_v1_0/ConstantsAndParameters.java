@@ -37,7 +37,7 @@ public class ConstantsAndParameters {
     
     //public static  String MPS_FILE_ON_DISK =  "F:\\temporary files here\\rd-rplusc-21.mps";
     //public static  String MPS_FILE_ON_DISK =  "F:\\temporary files here\\atlanta-ip.mps"; //windows
-    public static  String MPS_FILE_ON_DISK =  "p100x588b.mps";  //linux
+    public static  String MPS_FILE_ON_DISK =  "";  //linux
     
 
     //public static final String LOG_FOLDER="F:\\temporary files here\\logs\\testing\\ccav1_3\\"; //windows
@@ -84,13 +84,14 @@ public class ConstantsAndParameters {
     /* 
     public static   String MIP_NAME_UNDER_TEST ="lrsa120";
     public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 9000;    
-    public static  int NUM_PARTITIONS =125;
+    public static  int NUM_PARTITIONS =65;
     */
+  
      
      
     public static   String MIP_NAME_UNDER_TEST ="b2c1s1";
     public static  int NUM_PARTITIONS =300;
-    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = NUM_PARTITIONS*FOUR;    
+    public static   int RAMP_UP_TO_THIS_MANY_LEAFS = 1500;    
     
     
         

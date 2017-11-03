@@ -251,6 +251,8 @@ public class ActiveSubtree {
             
             cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
             cplex.setParam(IloCplex.Param.MIP.Strategy.File, THREE);     // low memory !
+        } else {
+            cplex.setParam(IloCplex.Param.MIP.Strategy.File, ZERO); 
         }
         
         cplex.solve();
