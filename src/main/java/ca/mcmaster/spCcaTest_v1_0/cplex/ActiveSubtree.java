@@ -82,7 +82,7 @@ public class ActiveSubtree {
 
     
     static {
-        logger.setLevel(Level.WARN);
+        logger.setLevel(Level.OFF);
         PatternLayout layout = new PatternLayout("%5p  %d  %F  %L  %m%n");     
         try {
             logger.addAppender(new  RollingFileAppender(layout,LOG_FOLDER+ActiveSubtree.class.getSimpleName()+ LOG_FILE_EXTENSION));
@@ -92,6 +92,11 @@ public class ActiveSubtree {
             System.err.println("Exit: unable to initialize logging");       
             exit(1);
         }
+        
+        
+        logger.debug("params are SAVE_TO_DISK_FLAG="+ (SAVE_TO_DISK_FLAG?ONE:ZERO) +  " REPEAT_SBF_TEST_WITH_TIMESLICE_MULTIPLED_BY="+
+                     REPEAT_SBF_TEST_WITH_TIMESLICE_MULTIPLED_BY + " MAX_ITERATIONS_LIMIT="+MAX_ITERATIONS_LIMIT) ;
+        
           
     }
     
@@ -108,6 +113,9 @@ public class ActiveSubtree {
         branchHandler = new BranchHandler(    );
         rampUpNodeHandler = new RampUpNodeHandler(    );                
         leafFetchNodeHandler = new LeafFetchingNodeHandler(); 
+        
+        
+        //cplex.setOut(null);
     
     }
     
@@ -230,7 +238,7 @@ public class ActiveSubtree {
         
         if (SAVE_TO_DISK_FLAG){
             
-            cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
+            //cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
             cplex.setParam(IloCplex.Param.MIP.Strategy.File, THREE);     // low memory !
         }
         
@@ -249,7 +257,7 @@ public class ActiveSubtree {
         
         if (SAVE_TO_DISK_FLAG){
             
-            cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
+            //cplex.setParam(IloCplex.Param.WorkMem,  WORK_MEM);
             cplex.setParam(IloCplex.Param.MIP.Strategy.File, THREE);     // low memory !
         } else {
             cplex.setParam(IloCplex.Param.MIP.Strategy.File, ZERO); 
@@ -279,6 +287,7 @@ public class ActiveSubtree {
         if (isRampUp) {
             rampUpNodeHandler.setLeafCountLimit(leafCountLimit);
             this.cplex.use(rampUpNodeHandler) ;
+            cplex.setParam(IloCplex.Param.MIP.Strategy.File, ZERO); 
             cplex.setParam(IloCplex.Param.MIP.Strategy.Backtrack, ZERO);    
         }  
         
@@ -286,7 +295,7 @@ public class ActiveSubtree {
         if (setCutoff) setCutoffValue(  cutoff);
         setTimeLimitMinutes (  timeLimitMinutes );
                 
-        cplex.setParam(IloCplex.Param.MIP.Strategy.File, TWO);    //low memory !   
+        //cplex.setParam(IloCplex.Param.MIP.Strategy.File, TWO);    //low memory !   
         cplex.solve();
         
         //solve complete - now get the active leafs

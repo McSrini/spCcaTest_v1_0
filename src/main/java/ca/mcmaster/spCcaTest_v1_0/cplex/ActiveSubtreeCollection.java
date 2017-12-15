@@ -60,7 +60,7 @@ public class ActiveSubtreeCollection {
     public    int maxTreesCreatedDuringSolution = ONE;
     
     static {
-        logger.setLevel(Level.DEBUG);
+        logger.setLevel(Level.OFF);
         PatternLayout layout = new PatternLayout("%5p  %d  %F  %L  %m%n");     
         try {
             RollingFileAppender rfa =new  RollingFileAppender(layout,LOG_FOLDER+ActiveSubtreeCollection.class.getSimpleName()+ LOG_FILE_EXTENSION);
@@ -83,6 +83,11 @@ public class ActiveSubtreeCollection {
         //this.promoteCCANodeIntoActiveSubtree( this.getRawNodeWithBestLPRelaxation(), false);
         
         PARTITION_ID=id;
+        
+        
+        logger.debug("params are SAVE_TO_DISK_FLAG="+ (SAVE_TO_DISK_FLAG?ONE:ZERO) +  " REPEAT_SBF_TEST_WITH_TIMESLICE_MULTIPLED_BY="+
+                     REPEAT_SBF_TEST_WITH_TIMESLICE_MULTIPLED_BY + " MAX_ITERATIONS_LIMIT="+MAX_ITERATIONS_LIMIT) ;
+        
     }
     
     public void setCutoff (double cutoff) {
@@ -255,6 +260,10 @@ public class ActiveSubtreeCollection {
     
     public int getNumTrees() {
         return  activeSubTreeList.size();
+    }
+    
+    public double getBestRemainingLPRElaxValue () throws Exception{
+        return getBestReaminingLPRElaxValue();
     }
     
     private void printStatus() throws IloException {
